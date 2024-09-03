@@ -1,6 +1,7 @@
 package com.example.auth.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,11 +21,15 @@ public class User implements UserDetails {
     private long id;
     private String uuid;
     private String login;
+    @Getter
     private String email;
     private String password;
+    @Getter
     @Enumerated(EnumType.STRING)
     private Role role;
+    @Column(name = "islock")
     private boolean isLock;
+    @Column(name = "isenabled")
     private boolean isEnabled;
 
     public User() {
