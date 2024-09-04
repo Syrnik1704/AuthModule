@@ -52,7 +52,7 @@ public class JwtService {
                 .compact();
     }
 
-    private String getSubject(final String token) {
+    public String getSubject(final String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(SECRET)
                 .build()
