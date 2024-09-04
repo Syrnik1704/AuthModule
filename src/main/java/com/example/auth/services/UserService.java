@@ -105,6 +105,15 @@ public class UserService {
         return ResponseEntity.ok(new AuthResponse(Code.INCORRECT_DATA));
     }
 
+    public ResponseEntity<LoginResponse> loggedIn(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            validateToken(request, response);
+            return ResponseEntity.ok(new LoginResponse(true));
+        } catch (ExpiredJwtException | IllegalArgumentException e) {
+            return ResponseEntity.ok(new LoginResponse(false));
+        }
+    }
+
     public ResponseEntity<?> loginByToken(HttpServletRequest request, HttpServletResponse response) {
         try {
             validateToken(request, response);
