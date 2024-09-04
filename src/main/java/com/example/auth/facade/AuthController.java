@@ -26,7 +26,7 @@ public class AuthController {
             userService.register(user);
             return ResponseEntity.ok(new AuthResponse(Code.SUCCESS));
         } catch (UserExistingWithName e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(Code.BAD_LOGIN_2));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(Code.BAD_LOGIN));
         } catch (UserExistingWithEmail e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse(Code.BAD_EMAIL));
         }

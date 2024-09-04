@@ -44,12 +44,16 @@ public class UserService {
     public void validateToken(HttpServletRequest request, HttpServletResponse response) throws ExpiredJwtException, IllegalArgumentException {
         String token = null;
         String refresh = null;
-        for (Cookie cookie : Arrays.stream(request.getCookies()).toList()) {
-            if (cookie.getName().equals("Authorization")) {
-                token = cookie.getValue();
-            } else if (cookie.getName().equals("refresh")) {
-                refresh = cookie.getValue();
+        if (request.getCookies() != null) {
+            for (Cookie cookie : Arrays.stream(request.getCookies()).toList()) {
+                if (cookie.getName().equals("Authorization")) {
+                    token = cookie.getValue();
+                } else if (cookie.getName().equals("refresh")) {
+                    refresh = cookie.getValue();
+                }
             }
+        } else {
+            throw new IllegalArgumentException("Token can't be null");
         }
         try {
             jwtService.validateToken(token);
@@ -97,7 +101,7 @@ public class UserService {
                 return ResponseEntity.ok(new AuthResponse(Code.LOGIN_FAILED));
             }
         }
-        return ResponseEntity.ok(new AuthResponse(Code.BAD_LOGIN_1));
+        return ResponseEntity.ok(new AuthResponse(Code.INCORRECT_DATA));
     }
 
     public void setAsAdmin(UserRegisterDTO userRegisterDTO) {
