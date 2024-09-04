@@ -105,6 +105,14 @@ public class UserService {
         return ResponseEntity.ok(new AuthResponse(Code.INCORRECT_DATA));
     }
 
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        Cookie cookie = cookieService.removeCookie(request.getCookies(), "Authorization");
+        response.addCookie(cookie);
+        cookie = cookieService.removeCookie(request.getCookies(), "refresh");
+        response.addCookie(cookie);
+        return ResponseEntity.ok(new AuthResponse(Code.SUCCESS));
+    }
+
     public ResponseEntity<LoginResponse> loggedIn(HttpServletRequest request, HttpServletResponse response) {
         try {
             validateToken(request, response);
