@@ -107,9 +107,13 @@ public class UserService {
 
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         Cookie cookie = cookieService.removeCookie(request.getCookies(), "Authorization");
-        response.addCookie(cookie);
+        if (cookie != null) {
+            response.addCookie(cookie);
+        }
         cookie = cookieService.removeCookie(request.getCookies(), "refresh");
-        response.addCookie(cookie);
+        if (cookie != null) {
+            response.addCookie(cookie);
+        }
         return ResponseEntity.ok(new AuthResponse(Code.SUCCESS));
     }
 
