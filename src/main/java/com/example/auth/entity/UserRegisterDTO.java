@@ -13,7 +13,7 @@ import org.hibernate.validator.constraints.Length;
 public class UserRegisterDTO {
     @Length(min = 5, max = 50, message = "Login should contains from 5 to max 50 characters")
     private String login;
-    @Email
+    @Email(message = "Provided email is not in appropriate format")
     private String email;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Length(min = 8, max = 75, message = "Password should contains from 8 to max 75 characters")

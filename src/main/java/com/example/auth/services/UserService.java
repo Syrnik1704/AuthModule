@@ -1,6 +1,8 @@
 package com.example.auth.services;
 
 import com.example.auth.entity.*;
+import com.example.auth.exceptions.UserExistingWithEmail;
+import com.example.auth.exceptions.UserExistingWithName;
 import com.example.auth.repository.UserRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
@@ -39,11 +41,11 @@ public class UserService {
         return jwtService.generateToken(username, exp);
     }
 
-    public void validateToken(HttpServletRequest request) throws ExpiredJwtException, IllegalArgumentException {
+    public void validateToken(HttpServletRequest request, HttpServletResponse response) throws ExpiredJwtException, IllegalArgumentException {
         String token = null;
         String refresh = null;
         for (Cookie cookie : Arrays.stream(request.getCookies()).toList()) {
-            if (cookie.getName().equals("token")) {
+            if (cookie.getName().equals("Authorization")) {
                 token = cookie.getValue();
             } else if (cookie.getName().equals("refresh")) {
                 refresh = cookie.getValue();
@@ -53,19 +55,25 @@ public class UserService {
             jwtService.validateToken(token);
         } catch (IllegalArgumentException | ExpiredJwtException e) {
             jwtService.validateToken(refresh);
+            Cookie refreshCookie = cookieService.generateCookie("refresh", jwtService.refreshToken(refresh, refreshExp), refreshExp);
+            Cookie authorizationCookie = cookieService.generateCookie("Authorization", jwtService.refreshToken(refresh, exp), exp);
+            response.addCookie(authorizationCookie);
+            response.addCookie(refreshCookie);
         }
     }
 
-    public void register(UserRegisterDTO userRegisterDTO) {
+    public void register(UserRegisterDTO userRegisterDTO) throws UserExistingWithEmail, UserExistingWithName {
+        userRepository.findUserByLogin(userRegisterDTO.getLogin()).ifPresent(value -> {
+            throw new UserExistingWithName("User with this login already exists");
+        });
+        userRepository.findUserByEmail(userRegisterDTO.getEmail()).ifPresent(value -> {
+            throw new UserExistingWithEmail("User with this email already exists");
+        });
         User user = new User();
         user.setLogin(userRegisterDTO.getLogin());
         user.setPassword(userRegisterDTO.getPassword());
         user.setEmail(userRegisterDTO.getEmail());
-        if (userRegisterDTO.getRole() != null) {
-            user.setRole(userRegisterDTO.getRole());
-        } else {
-            user.setRole(Role.USER);
-        }
+        user.setRole(Role.USER);
         saveUser(user);
     }
 
@@ -76,7 +84,7 @@ public class UserService {
                     new UsernamePasswordAuthenticationToken(requestedUser.getUsername(), requestedUser.getPassword()));
             if (authentication.isAuthenticated()) {
                 Cookie refresh = cookieService.generateCookie("refresh", generateToken(requestedUser.getUsername(), refreshExp), refreshExp);
-                Cookie token = cookieService.generateCookie("token", generateToken(requestedUser.getUsername(), exp), exp);
+                Cookie token = cookieService.generateCookie("Authorization", generateToken(requestedUser.getUsername(), exp), exp);
                 response.addCookie(token);
                 response.addCookie(refresh);
                 return ResponseEntity.ok(
@@ -86,10 +94,17 @@ public class UserService {
                                 .role(user.getRole())
                                 .build());
             } else {
-                return ResponseEntity.ok(new AuthResponse(Code.A1));
+                return ResponseEntity.ok(new AuthResponse(Code.LOGIN_FAILED));
             }
         }
-        return ResponseEntity.ok(new AuthResponse(Code.A2));
+        return ResponseEntity.ok(new AuthResponse(Code.BAD_LOGIN_1));
+    }
+
+    public void setAsAdmin(UserRegisterDTO userRegisterDTO) {
+        userRepository.findUserByLogin(userRegisterDTO.getLogin()).ifPresent(value -> {
+            value.setRole(Role.ADMIN);
+            userRepository.save(value);
+        });
     }
 
 }
