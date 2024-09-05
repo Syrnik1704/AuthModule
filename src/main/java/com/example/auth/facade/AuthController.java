@@ -1,6 +1,7 @@
 package com.example.auth.facade;
 
 import com.example.auth.entity.*;
+import com.example.auth.exceptions.UserDoesntExistException;
 import com.example.auth.exceptions.UserExistingWithEmail;
 import com.example.auth.exceptions.UserExistingWithName;
 import com.example.auth.services.UserService;
@@ -59,6 +60,16 @@ public class AuthController {
             return ResponseEntity.ok(new AuthResponse(Code.PERMIT));
         } catch (IllegalArgumentException | ExpiredJwtException e) {
             return ResponseEntity.status(401).body(new AuthResponse(Code.BAD_TOKEN));
+        }
+    }
+
+    @RequestMapping(path = "/activate", method = RequestMethod.GET)
+    public ResponseEntity<AuthResponse> acttivateUser(@RequestParam String uid) {
+        try {
+            userService.activateUser(uid);
+            return ResponseEntity.ok(new AuthResponse(Code.SUCCESS));
+        } catch (UserDoesntExistException e) {
+            return ResponseEntity.status(400).body(new AuthResponse(Code.USER_DONT_EXIST));
         }
     }
 

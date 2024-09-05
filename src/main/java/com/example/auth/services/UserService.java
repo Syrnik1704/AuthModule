@@ -1,6 +1,7 @@
 package com.example.auth.services;
 
 import com.example.auth.entity.*;
+import com.example.auth.exceptions.UserDoesntExistException;
 import com.example.auth.exceptions.UserExistingWithEmail;
 import com.example.auth.exceptions.UserExistingWithName;
 import com.example.auth.repository.UserRepository;
@@ -140,7 +141,7 @@ public class UserService {
                 }
             }
             String login = jwtService.getSubject(refresh);
-            User user = userRepository.findUserByLoginAndLockAndEnabled(login, true, true).orElse(null);
+            User user = userRepository.findUserByLoginAndLockAndEnabled(login, false, true).orElse(null);
             if (user != null) {
                 return ResponseEntity.ok(
                         UserRegisterDTO.builder()
@@ -154,6 +155,16 @@ public class UserService {
         } catch (ExpiredJwtException | IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse(Code.BAD_TOKEN));
         }
+    }
+
+    public void activateUser(String uid) throws UserDoesntExistException {
+        User user = userRepository.findUserByUuid(uid).orElse(null);
+        if (user != null) {
+            user.setLock(false);
+            userRepository.save(user);
+            return;
+        }
+        throw new UserDoesntExistException("User with this UID doesn't exist");
     }
 
     public void setAsAdmin(UserRegisterDTO userRegisterDTO) {
