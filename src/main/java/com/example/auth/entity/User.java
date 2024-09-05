@@ -28,24 +28,22 @@ public class User implements UserDetails {
     @Getter
     @Enumerated(EnumType.STRING)
     private Role role;
-    @Column(name = "islock")
-    private boolean isLock;
-    @Column(name = "isenabled")
-    private boolean isEnabled;
+    private boolean lock;
+    private boolean enabled;
 
     public User() {
         generateUuid();
     }
 
-    public User(long id, String uuid, String login, String email, String password, Role role, boolean isLock, boolean isEnabled) {
+    public User(long id, String uuid, String login, String email, String password, Role role, boolean lock, boolean enabled) {
         this.id = id;
         this.uuid = uuid;
         this.login = login;
         this.email = email;
         this.password = password;
         this.role = role;
-        this.isLock = isLock;
-        this.isEnabled = isEnabled;
+        this.lock = lock;
+        this.enabled = enabled;
         generateUuid();
     }
 
@@ -66,12 +64,12 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !isLock;
+        return !lock;
     }
 
     @Override
     public boolean isEnabled() {
-        return isEnabled;
+        return enabled;
     }
 
     private void generateUuid() {

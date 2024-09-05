@@ -23,7 +23,7 @@ public class EmailConfiguration {
 
     private void config() {
         String smtpHost = "smtp.gmail.com";
-        int smtpPort = 465;
+        int smtpPort = 587;
 
         properties = new Properties();
         properties.put("mail.smtp.auth", "true");

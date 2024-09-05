@@ -27,6 +27,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
     private final CookieService cookieService;
     @Value("${jwt.exp}")
     private int exp;
@@ -75,11 +76,14 @@ public class UserService {
             throw new UserExistingWithEmail("User with this email already exists");
         });
         User user = new User();
+        user.setLock(true);
         user.setLogin(userRegisterDTO.getLogin());
         user.setPassword(userRegisterDTO.getPassword());
         user.setEmail(userRegisterDTO.getEmail());
         user.setRole(Role.USER);
+
         saveUser(user);
+        emailService.sendActivationEmail(user);
     }
 
     public ResponseEntity<?> login(HttpServletResponse response, User requestedUser) {
@@ -136,7 +140,7 @@ public class UserService {
                 }
             }
             String login = jwtService.getSubject(refresh);
-            User user = userRepository.findUserByLoginAndLockAndEnabled(login).orElse(null);
+            User user = userRepository.findUserByLoginAndLockAndEnabled(login, true, true).orElse(null);
             if (user != null) {
                 return ResponseEntity.ok(
                         UserRegisterDTO.builder()
