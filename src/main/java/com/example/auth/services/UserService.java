@@ -88,7 +88,7 @@ public class UserService {
     }
 
     public ResponseEntity<?> login(HttpServletResponse response, User requestedUser) {
-        User user = userRepository.findUserByLogin(requestedUser.getUsername()).orElse(null);
+        User user = userRepository.findUserByLoginAndLockAndEnabled(requestedUser.getUsername()).orElse(null);
         if (user != null) {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(requestedUser.getUsername(), requestedUser.getPassword()));
@@ -141,7 +141,7 @@ public class UserService {
                 }
             }
             String login = jwtService.getSubject(refresh);
-            User user = userRepository.findUserByLoginAndLockAndEnabled(login, false, true).orElse(null);
+            User user = userRepository.findUserByLoginAndLockAndEnabled(login).orElse(null);
             if (user != null) {
                 return ResponseEntity.ok(
                         UserRegisterDTO.builder()
