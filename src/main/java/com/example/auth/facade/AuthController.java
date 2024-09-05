@@ -73,6 +73,16 @@ public class AuthController {
         }
     }
 
+    @RequestMapping(path = "/reset-password", method = RequestMethod.POST)
+    public ResponseEntity<AuthResponse> sendEmailToResetPassword(@RequestBody ResetPasswordViaEmailBody resetPasswordViaEmailBody) {
+        try {
+            userService.sendEmailToResetPassword(resetPasswordViaEmailBody.getEmail());
+            return ResponseEntity.ok(new AuthResponse(Code.SUCCESS));
+        } catch (UserDoesntExistException e) {
+            return ResponseEntity.status(400).body(new AuthResponse(Code.USER_DONT_EXIST));
+        }
+    }
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ValidationMessage handleValidationException(MethodArgumentNotValidException exception) {

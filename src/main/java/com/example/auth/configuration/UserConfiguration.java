@@ -40,7 +40,9 @@ public class UserConfiguration {
                                         "/api/v1/auth/validate",
                                         "/api/v1/auth/logout",
                                         "/api/v1/auth/auto-login",
-                                        "/api/v1/auth/logged-in")
+                                        "/api/v1/auth/logged-in",
+                                        "/api/v1/auth/activate",
+                                        "/api/v1/auth/reset-password")
                                 .permitAll()  // Allow unauthenticated access to these endpoints
                                 .anyRequest().authenticated()  // Require authentication for all other endpoints
                 );

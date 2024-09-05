@@ -17,6 +17,8 @@ public class EmailService {
     private final EmailConfiguration emailConfiguration;
     @Value("classpath:static/email_activate.html")
     Resource activateTemplate;
+    @Value("classpath:static/email_reset_password.html")
+    Resource resetPasswordTemplate;
     @Value("${frontend.url}")
     private String frontendUrl;
 
@@ -26,6 +28,17 @@ public class EmailService {
             String html = Files.readString(file.toPath(), StandardCharsets.UTF_8);
             html = html.replace("https://google.com", frontendUrl + "/activate/" + user.getUuid());
             emailConfiguration.sendEmail(user.getEmail(), "Activate Your Account", html, true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void sendEmailToResetPassword(User user) {
+        try {
+            File file = resetPasswordTemplate.getFile();
+            String html = Files.readString(file.toPath(), StandardCharsets.UTF_8);
+            html = html.replace("https://google.com", frontendUrl + "/reset-password/" + user.getUuid());
+            emailConfiguration.sendEmail(user.getEmail(), "Reset Password", html, true);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -167,6 +167,15 @@ public class UserService {
         throw new UserDoesntExistException("User with this UID doesn't exist");
     }
 
+    public void sendEmailToResetPassword(String email) {
+        User user = userRepository.findUserByEmail(email).orElse(null);
+        if (user != null) {
+            emailService.sendEmailToResetPassword(user);
+            return;
+        }
+        throw new UserDoesntExistException("User with this email doesn't exist");
+    }
+
     public void setAsAdmin(UserRegisterDTO userRegisterDTO) {
         userRepository.findUserByLogin(userRegisterDTO.getLogin()).ifPresent(value -> {
             value.setRole(Role.ADMIN);
